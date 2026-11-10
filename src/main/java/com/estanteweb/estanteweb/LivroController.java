@@ -150,6 +150,28 @@ public class LivroController {
         return null;
     }
 
+    @GetMapping("/livros/{id}/remover")
+    public String confirmarRemocao(@PathVariable Long id, Model model) {
+        Livro livro = livroRepository.buscarPorId(id);
+
+        if (livro == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        model.addAttribute("livro", livro);
+        return "livro-remover";
+    }
+
+    @PostMapping("/livros/{id}/remover")
+    public String removerLivro(@PathVariable Long id) {
+        if (livroRepository.buscarPorId(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        livroRepository.remover(id);
+        return "redirect:/livros/html";
+    }
+
     @GetMapping("/livros/quem-acessa")
     @ResponseBody
     public String quemAcessa(@RequestHeader("User-Agent") String userAgent) {

@@ -101,4 +101,9 @@ public class LivroRepository {
                 livro.getPreco(),
                 livro.getId());
     }
+
+    public void remover(Long id) {
+        String sql = "DELETE FROM livro WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
 }
