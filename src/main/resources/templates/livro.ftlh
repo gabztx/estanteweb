@@ -16,4 +16,5 @@
     </ul>
 </#if>
 
+<p><a href="/livros/${livro.id?c}/editar">Corrigir este livro</a></p>
 <p><a href="/livros/html">Voltar para o acervo</a></p>

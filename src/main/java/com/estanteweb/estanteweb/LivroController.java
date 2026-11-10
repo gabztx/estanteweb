@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -101,6 +102,52 @@ public class LivroController {
         model.addAttribute("livro", livro);
         model.addAttribute("doMesmoAutor", livroRepository.listarDoMesmoAutor(livro.getAutor(), id));
         return "livro";
+    }
+
+    @GetMapping("/livros/{id}/editar")
+    public String editarLivro(@PathVariable Long id, Model model) {
+        Livro livro = livroRepository.buscarPorId(id);
+
+        if (livro == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        model.addAttribute("livro", livro);
+        return "livro-editar";
+    }
+
+    @PostMapping("/livros/{id}/editar")
+    public String salvarEdicao(@PathVariable Long id,
+            @ModelAttribute Livro livro,
+            BindingResult resultado,
+            Model model) {
+
+        if (livroRepository.buscarPorId(id) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        // o id vem sempre da URL, nunca do formulário
+        livro.setId(id);
+
+        String erro = validarEdicao(livro, resultado);
+        if (erro != null) {
+            model.addAttribute("erro", erro);
+            return "livro-editar";
+        }
+
+        livroRepository.atualizar(livro);
+        return "redirect:/livros/" + id;
+    }
+
+    private String validarEdicao(Livro livro, BindingResult resultado) {
+        if (livro.getAutor() == null || livro.getAutor().isBlank()
+                || livro.getTitulo() == null || livro.getTitulo().isBlank()) {
+            return "Autor e título são obrigatórios!";
+        }
+        if (resultado.hasErrors() || livro.getAno() == null || livro.getPreco() == null) {
+            return "Ano e preço são obrigatórios e devem ser números (no preço, use ponto: 24.90).";
+        }
+        return null;
     }
 
     @GetMapping("/livros/quem-acessa")
